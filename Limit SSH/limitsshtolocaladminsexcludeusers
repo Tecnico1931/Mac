@@ -1,0 +1,22 @@
+#!/bin/bash
+ 
+# set the input for lazy convenience
+IFS=$' '
+ 
+localadmins=$(/usr/bin/dscl localhost -read /Local/Default/Groups/admin GroupMembership | awk -F': ' '{print $2}')
+ 
+for account in `echo $localadmins`; do
+# add additional blocks like >> && ! [ "$account" == "username" ] << for additional exclusions
+if ! [ "$account" == "root" ] && ! [ "$account" == "itstech" ]; then
+userID=$(/usr/bin/dscl localhost -read /Local/Default/Users/$account | grep GeneratedUID | awk '{print $2}')
+if [ "$userID" != "" ]; then
+# This is a placeholder line for testing. If it returns what you expect then ebable the lines below it.
+echo "Found $account with GUID: $userID"
+# Uncomment the two lines below to make the script modify the access_ssh group membership
+#/usr/bin/dscl localhost -append /Local/Default/Groups/com.apple.access_ssh GroupMembership "$admin"
+#/usr/bin/dscl localhost -append /Local/Default/Groups/com.apple.access_ssh GroupMembers "$userID"
+else
+echo "$account has no local GUID"
+fi
+fi
+done
